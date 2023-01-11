@@ -1,28 +1,24 @@
 import { Router } from "express";
-import { Request, Response, NextFunction } from "express";
 import * as line from "@line/bot-sdk";
 
 const WebhookRouter = Router();
 
-//"ご自身のchannel accsess token key";
-// const getChannelSeacret = process.env.CHANNEL_SECRET;
-// const getChannelAccessToken = process.env.CHANNEL_ACCESS_TOKEN;
 
 const config:any = {
   channelSecret: process.env.CHANNEL_SECRET,
   channelAccessToken: process.env.CHANNEL_ACCESS_TOKEN,
 };
 
-//不要なはず
-// const app = express();
+WebhookRouter.use("/webhook", line.middleware(config));
+
 
 WebhookRouter.get("/",(req: any, res: any) => {
+    
     return res.status(200).send({ message: "テスト成功" })
 })
 
 WebhookRouter.post(
   "/",
-  line.middleware(config),
   (req: any, res: any) => {
     console.log(req.body.events);
 
@@ -56,9 +52,6 @@ async function handleEvent(event:any) {
   });
 }
 
-//不要なはず
-// app.listen(PORT);
-// console.log(`Server running at ${PORT}`);
 
 // **** Export default **** //
 
