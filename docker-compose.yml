@@ -1,0 +1,18 @@
+version: "3"
+services:
+  backend:
+      image: node:16
+      container_name: express
+      tty: true
+      expose:
+        - 3000
+        - 9229
+      environment:
+        TZ: "Asia/Tokyo"
+      ports: 
+        - 3000:3000
+        - 9229:9229
+      volumes:
+        - ./:/src
+      working_dir: /src/app
+      command: sh -c "npm install && npm run dev"
