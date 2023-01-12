@@ -60,7 +60,7 @@ async function handleEvent(event: WebhookEvent) {
 
   } else if (event.message.text === "疲れた" && rootBalance >= 1000) {
     // ごほうび口座へ振替API呼び出し 100円
-    request(selfTransferService100, function (error, selfTransferResponse) {
+    request(selfTransferService100, function (error: any, selfTransferResponse: { body: string; }) {
       if (error) throw new Error(error);
       const responsePaymentAmount = JSON.parse(
         selfTransferResponse.body
@@ -79,7 +79,7 @@ async function handleEvent(event: WebhookEvent) {
 
   } else if (event.message.text === "つらい" && rootBalance >= 1000) {
     // ごほうび口座へ振替API呼び出し 1000円
-    request(selfTransferService1000, function (error, selfTransferResponse) {
+    request(selfTransferService1000, function (error: any, selfTransferResponse: { body: string; }) {
       if (error) throw new Error(error);
       const responsePaymentAmount = JSON.parse(
         selfTransferResponse.body
