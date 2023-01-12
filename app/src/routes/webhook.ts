@@ -147,23 +147,6 @@ async function handleEvent(event: WebhookEvent) {
         text: resMessage,
       });
     }
-    //貯める！場合の処理を一旦ここに記載しました
-  } else if (event.message.text == "貯める") {
-    /* 残高照会 */
-    const response = await balancesService.get("/");
-    const childBalance = response.data.spAccountBalances[1].odBalance;
-
-    /* 残高を親口座に振替*/
-    const childSpAcId = "SP50220329019";
-    const parentSpAcId = "SP30110005951";
-    spAccountsTransfer(parentSpAcId, childSpAcId, childBalance);
-
-    let resMessage = `親口座に${Number(childBalance).toLocaleString()}円振替したよ`;
-    return client.replyMessage(event.replyToken, {
-      type: "text",
-      text: resMessage,
-    });
-
   } return useDeposit(event);
 }
 
