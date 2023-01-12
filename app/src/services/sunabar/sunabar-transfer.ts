@@ -8,18 +8,6 @@ export const transferService = async (
   accountNumber: any,
   transferAmount: any
 ) => {
-  // //支店番号抽出
-  // const beneficiaryBranchCode = str.match(/\d{3}-?\d{7}/)[0].slice(0, 3);
-  // //支店番号抽出
-  // const accountNumber = str.match(/\d{3}-?\d{7}/)[0].slice(4);
-  // //振込額抽出
-  // const sliceText = str.replace(/\d{3}-?\d{7}/, "");
-  // const transferAmount = sliceText.match(/[0-9]+/)[0];
-  // //確認
-  // console.log("支店番号", beneficiaryBranchCode);
-  // console.log("口座番号", accountNumber);
-  // console.log("transferAmount", transferAmount);
-
 
   //振込日セット
   const dt = new Date(Date.now() + 3600000 * 9);

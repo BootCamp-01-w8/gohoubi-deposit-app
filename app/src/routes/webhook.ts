@@ -22,20 +22,6 @@ WebhookRouter.get("/", (req: any, res: any) => {
   return res.status(200).send({ message: "テスト成功" });
 });
 
-WebhookRouter.post("/", (req: any, res: any) => {
-  console.log(req.body.events);
-
-  Promise.all(req.body.events.map(handleEvent)).then((result) =>
-    res.json(result)
-  );
-});
-
-const client = new line.Client(config);
-
-async function handleEvent(event: any) {
-  if (event.type !== "message" || event.message.type !== "text")
-  {
-    // ここでポストバック用の分岐も作る。
 
 WebhookRouter.post(
   "/",
@@ -118,14 +104,14 @@ async function handleEvent(event: WebhookEvent) {
   {
     /* text整形 */
     //支店番号
-    const beneficiaryBranchCode = event.message.text
-      .match(/\d{3}-?\d{7}/)[0]
-      .slice(0, 3);
+    let strMatch:any = event.message.text.match(/\d{3}-?\d{7}/);
+    const beneficiaryBranchCode = strMatch[0].slice(0, 3);
     //口座番号
-    const accountNumber = event.message.text.match(/\d{3}-?\d{7}/)[0].slice(4);
+    const accountNumber = strMatch[0].slice(4);
     //振込額
     const sliceText = event.message.text.replace(/\d{3}-?\d{7}/, "");
-    const transferAmount = sliceText.match(/[0-9]+/)[0];
+    strMatch = sliceText.match(/[0-9]+/);
+    const transferAmount = strMatch[0];
 
     /* 残高照会 */
     const response = await balancesService.get("/");
