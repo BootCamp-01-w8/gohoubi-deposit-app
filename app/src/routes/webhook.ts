@@ -1,10 +1,10 @@
 import { Router } from "express";
 import * as line from "@line/bot-sdk";
-import { TemplateMessage } from '@line/bot-sdk';
+import { WebhookEvent } from '@line/bot-sdk';
 import { balancesService } from "@src/services/sunabar-service";
+import { useDeposit } from "@src/services/use-deposit";
 
 const WebhookRouter = Router();
-
 
 const config: any = {
   channelSecret: process.env.CHANNEL_SECRET,
@@ -13,9 +13,7 @@ const config: any = {
 
 WebhookRouter.use("/webhook", line.middleware(config));
 
-
 WebhookRouter.get("/", (req: any, res: any) => {
-
   return res.status(200).send({ message: "テスト成功" })
 })
 
@@ -23,7 +21,6 @@ WebhookRouter.post(
   "/",
   (req: any, res: any) => {
     console.log(req.body.events);
-
     Promise.all(req.body.events.map(handleEvent)).then((result) =>
       res.json(result)
     );
@@ -32,10 +29,16 @@ WebhookRouter.post(
 
 const client = new line.Client(config);
 
-async function handleEvent(event: any) {
+async function handleEvent(event: WebhookEvent) {
+  // postback　
+  if(event.type === "postback") {
+    console.log("postback")
+    if(event.postback.data === "useDeposit"){
+        
+    }
+  }
   if (event.type !== "message" || event.message.type !== "text") {
-    // ここでポストバック用の分岐も作る。
-    console.log("テキストじゃない")
+
     return Promise.resolve(null);
   } else if (event.message.text === "使う") {
     console.log(event);
@@ -56,40 +59,7 @@ async function handleEvent(event: any) {
   return useDeposit(event);
 }
 
-// 「ご褒美使う？」を問うボタンテンプレート　「使う！」、「もう少し頑張る！」、「貯める！」
-const useDeposit = (event: any) => {
-  const param: TemplateMessage = {
-    type: "template",
-    altText: "This is a buttons template",
-    template: {
-      type: "buttons",
-      thumbnailImageUrl: "https://example.com/bot/images/image.jpg",
-      imageAspectRatio: "rectangle",
-      imageSize: "cover",
-      imageBackgroundColor: "#FFFFFF",
-      title: "Menu",
-      text: "Please select",
-      actions: [
-        {
-          type: "postback",
-          label: "Buy",
-          data: "action=buy&itemid=123"
-        },
-        {
-          type: "postback",
-          label: "Add to cart",
-          data: "action=add&itemid=123"
-        },
-        {
-          type: "uri",
-          label: "View detail",
-          uri: "http://example.com/page/123"
-        }
-      ]
-    }
-  }
-  return client.replyMessage(event.replyToken, param);
-}
+
 
 
 // **** Export default **** //
