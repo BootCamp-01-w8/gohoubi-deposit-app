@@ -5,6 +5,7 @@ import { PostbackEvent } from '@line/bot-sdk';
 import { suggestUsage } from "@src/services/LINEbot/suggestUsage";
 import { balancesService } from "@src/services/sunabar/sunabar-service";
 import { spAccountsTransfer } from "@src/services/sunabar/spAccounts";
+import { endOfWeek } from "date-fns";
 
 const WebhookRouter = Router();
 
@@ -15,46 +16,44 @@ const config: any = {
 
 const client = new line.Client(config);
 
-export const postback = async(event: PostbackEvent) =>
-{
-
-    if (event.postback.data === "useDeposit")
-    {
+export const postback = async (event: PostbackEvent) => {
+    if (event.postback.data === "useDeposit") {
         return suggestUsage(event);
-    } else if (event.postback.data === "shopping")
-    {
-        // 楽天
-        console.log("楽天");
+    } else if (event.postback.data === "shopping") {
+        /* 楽天検索　ご褒美口座の残高によって価格帯をセット。*/
+        /* console.log("楽天");*/
+        const balance = await balancesService.get("/");
+        const max = balance.data.spAccountBalances[1].odBalance;
         return client.replyMessage(event.replyToken, {
             type: "text",
-            text: "楽天",
+            text: `https://search.rakuten.co.jp/search/mall/%E3%82%AE%E3%83%95%E3%83%88+%E5%A5%B3%E6%80%A7/?max=${max}&min=${max*0.8}&nitem=ふるさと納税`,
         });
-    } else if (event.postback.data === "eat")
-    {
-        // 食べログ
-        console.log("食べログ");
+    } else if (event.postback.data === "eat") {
+        /* 食べログ　現在地から周辺５㎞の食べログ検索結果が出したい。*/
+        /* console.log("食べログ");*/
         return client.replyMessage(event.replyToken, {
             type: "text",
-            text: "食べログ",
+            text: "https://tabelog.com/",
         });
-    } else if (event.postback.data === "travel")
-    {
-        // じゃらん
-        console.log("じゃらん");
+    } else if (event.postback.data === "travel") {
+        /* じゃらん 今週末から1泊２日で別府温泉の宿の検索結果。エリアコードをランダムに選んでセット出来たら楽しいかも。*/
+        /* console.log("じゃらん"); */
+        const today = endOfWeek(new Date());;
+        const stayYear = today.getFullYear();
+        const stayMonth = today.getMonth()+1;
+        const stayDay = today.getDate();
         return client.replyMessage(event.replyToken, {
             type: "text",
-            text: "じゃらん",
+            text: `https://www.jalan.net/440000/LRG_440500/?stayYear=${stayYear}&stayMonth=${stayMonth}&stayDay=${stayDay}&stayCount=1&roomCount=1&adultNum=1&ypFlg=1&kenCd=440000&screenId=UWW1380&roomCrack=200000&lrgCd=440500&distCd=01&rootCd=04`,
         });
-    } else if (event.postback.data === "transfer")
-    {
-        // 振込
-        console.log("振込");
+    } else if (event.postback.data === "transfer") {
+        /* 振込 */
+        /* console.log("振込"); */
         return client.replyMessage(event.replyToken, {
             type: "text",
-            text: "振込",
+            text: "振込先と金額を教えてね。", 
         });
-    } else if (event.postback.data === "振替")
-    {
+    } else if (event.postback.data === "振替") {
         /* 残高照会 */
         const response = await balancesService.get("/");
         const childBalance = response.data.spAccountBalances[1].odBalance;
