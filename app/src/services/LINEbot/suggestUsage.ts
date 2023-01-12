@@ -13,7 +13,7 @@ const client = new line.Client(config);
 
 // 「何に使う？」を問うボタンテンプレート　「ショッピング」、「旅行」、「ごはん」
 export const suggestUsage = (event: ReplyableEvent) => {
-    const message: FlexMessage = {
+    const message: any = {
         type: "flex",
         altText: "何に使う？",
         contents: {
@@ -64,8 +64,10 @@ export const suggestUsage = (event: ReplyableEvent) => {
                         action: {
                             type: "postback",
                             data: "transfer",
-                            displayText: "振込",
+                            displayText: "振込", // ここの文言自由に変えてください！
                             label: "transfer",
+                            inputOption: "openKeyboard",
+                            fillInText: "301-0000017に50000円振込" // ここの文言自由に変えてください！
                         }
                     }
                 ]
