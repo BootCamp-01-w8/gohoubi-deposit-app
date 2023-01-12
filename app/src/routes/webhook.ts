@@ -1,9 +1,10 @@
 import { Router } from "express";
 import * as line from "@line/bot-sdk";
 import { WebhookEvent ,TemplateMessage} from '@line/bot-sdk';
-import { balancesService } from "@src/services/sunabar-service";
-import { useDeposit } from "@src/services/use-deposit";
-import { transferService } from "@src/services/sunabar-transfer";
+import { balancesService } from "@src/services/sunabar/sunabar-service";
+import { useDeposit } from "@src/services/LINEbot/use-deposit";
+import { suggestUsage } from "@src/services/LINEbot/suggestUsage";
+import { transferService } from "@src/services/sunabar/sunabar-transfer";
 
 const WebhookRouter = Router();
 
@@ -35,11 +36,38 @@ async function handleEvent(event: WebhookEvent) {
   if(event.type === "postback") {
     console.log("postback")
     if(event.postback.data === "useDeposit"){
-        
+      return suggestUsage(event);
+    } else if (event.postback.data === "shopping"){
+      // 楽天
+      console.log("楽天");
+      return client.replyMessage(event.replyToken, {
+        type: "text",
+        text: "楽天",
+      });
+    } else if (event.postback.data === "eat"){
+      // 食べログ
+      console.log("食べログ");
+      return client.replyMessage(event.replyToken, {
+        type: "text",
+        text: "食べログ",
+      });
+    } else if (event.postback.data === "travel"){
+      // じゃらん
+      console.log("じゃらん");
+      return client.replyMessage(event.replyToken, {
+        type: "text",
+        text: "じゃらん",
+      });
+    } else if (event.postback.data === "transfer"){
+      // 振込
+      console.log("振込");
+      return client.replyMessage(event.replyToken, {
+        type: "text",
+        text: "振込",
+      });
     }
-  }
+  } 
   if (event.type !== "message" || event.message.type !== "text") {
-    // ここでポストバック用の分岐も作る。
     console.log("テキストじゃない");
     return Promise.resolve(null);
   } else if (event.message.text === "使う") {
