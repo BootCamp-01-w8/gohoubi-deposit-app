@@ -4,7 +4,6 @@ import { TemplateMessage } from "@line/bot-sdk";
 import { balancesService } from "@src/services/sunabar-service";
 import { transferService } from "@src/services/sunabar-transfer";
 
-
 const WebhookRouter = Router();
 
 const config: any = {
@@ -33,6 +32,48 @@ async function handleEvent(event: any) {
     // ここでポストバック用の分岐も作る。
     console.log("テキストじゃない");
     return Promise.resolve(null);
+  } else if (event.message.text === "残高") {
+    // 残高照会
+
+  } else if (event.message.text === "疲れた" && rootBalance < 1000) {
+    // 500円振替
+    return client.replyMessage(event.replyToken, [
+      {
+        type: "text",
+        text: `${resPaymentAmount}円をごほうび貯金したよ！`, // 振替金額
+      },
+      {
+        type: "text",
+        text: "おつかれさま！ゆっくりやすんでね。",
+      },
+    ]);
+
+  } else if (event.message.text === "つらい" && rootBalance < 1000) {
+    // 1000円振替
+    return client.replyMessage(event.replyToken, [
+      {
+        type: "text",
+        text: `${resPaymentAmount}円をごほうび貯金したよ！`, // 振替金額
+      },
+      {
+        type: "text",
+        text: "大変だったね！次のごほうびは何がいいかな？考えてみて。",
+      },
+    ]);
+
+  } else if (event.message.text === ("疲れた" || "つらい") && rootBalance < 1000) {
+    // 残高不足
+    return client.replyMessage(event.replyToken, [
+      {
+        type: "text",
+        text: "おつかれさま！残高不足で、ごほうび貯金できなかったよ",
+      },
+      {
+        type: "text",
+        text: `残高は、親口座：${rootBalance}円、ごほうび口座：${childBalance}円だよ。ゆっくり休んでね`,
+      },
+    ]);
+
   } else if (event.message.text === "使う") {
     console.log(event);
     let replyText = "";
@@ -48,23 +89,16 @@ async function handleEvent(event: any) {
       text: `親口座：${rootBalance},子口座：${childBalance}`,
     });
 
-
-
-
-
-
-
-
     //振込依頼 "301-0000017に50000円振込"金額は変更可
   } else if (
     /^(?=.*\d{3}-?\d{7})(?=.*円)(?=.*振?込)/.test(event.message.text)
   ) {
     const resMessage = await transferService(event.message.text);
 
-      return client.replyMessage(event.replyToken, {
-        type: "text",
-        text: resMessage,
-      });
+    return client.replyMessage(event.replyToken, {
+      type: "text",
+      text: resMessage,
+    });
   }
   return useDeposit(event);
 }
