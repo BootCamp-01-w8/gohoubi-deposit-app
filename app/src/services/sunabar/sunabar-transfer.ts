@@ -2,6 +2,7 @@ import axios from "axios";
 
 const sunabarToken = process.env.SUNABAR_TOKEN;
 
+
 export const transferService = async (
   beneficiaryBranchCode: any,
   accountNumber: any,
@@ -18,6 +19,7 @@ export const transferService = async (
   // console.log("支店番号", beneficiaryBranchCode);
   // console.log("口座番号", accountNumber);
   // console.log("transferAmount", transferAmount);
+
 
   //振込日セット
   const dt = new Date(Date.now() + 3600000 * 9);
@@ -73,6 +75,7 @@ export const transferService = async (
     });
 
   console.log("resMessage", resMessage);
+
   return resMessage;
 };
 
