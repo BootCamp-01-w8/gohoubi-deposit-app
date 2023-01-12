@@ -1,8 +1,13 @@
 import { Router } from "express";
 import * as line from "@line/bot-sdk";
-import { TemplateMessage } from "@line/bot-sdk";
-import { balancesService } from "@src/services/sunabar-service";
-import { transferService } from "@src/services/sunabar-transfer";
+
+import { transferService } from "@src/services/sunabar/sunabar-transfer";
+import { spAccountsTransfer } from "@src/services/sunabar/spAccounts";
+import { WebhookEvent ,TemplateMessage} from '@line/bot-sdk';
+import { balancesService } from "@src/services/sunabar/sunabar-service";
+import { useDeposit } from "@src/services/LINEbot/use-deposit";
+import { suggestUsage } from "@src/services/LINEbot/suggestUsage";
+
 
 const WebhookRouter = Router();
 
@@ -17,19 +22,56 @@ WebhookRouter.get("/", (req: any, res: any) => {
   return res.status(200).send({ message: "テスト成功" });
 });
 
-WebhookRouter.post("/", (req: any, res: any) => {
-  console.log(req.body.events);
 
-  Promise.all(req.body.events.map(handleEvent)).then((result) =>
-    res.json(result)
-  );
-});
+WebhookRouter.post(
+  "/",
+  (req: any, res: any) => {
+    console.log(req.body.events);
+    Promise.all(req.body.events.map(handleEvent)).then((result) =>
+      res.json(result)
+    );
+  }
+);
 
 const client = new line.Client(config);
 
-async function handleEvent(event: any) {
+async function handleEvent(event: WebhookEvent) {
+  // postback　
+  if(event.type === "postback") {
+    console.log("postback")
+    if(event.postback.data === "useDeposit"){
+      return suggestUsage(event);
+    } else if (event.postback.data === "shopping"){
+      // 楽天
+      console.log("楽天");
+      return client.replyMessage(event.replyToken, {
+        type: "text",
+        text: "楽天",
+      });
+    } else if (event.postback.data === "eat"){
+      // 食べログ
+      console.log("食べログ");
+      return client.replyMessage(event.replyToken, {
+        type: "text",
+        text: "食べログ",
+      });
+    } else if (event.postback.data === "travel"){
+      // じゃらん
+      console.log("じゃらん");
+      return client.replyMessage(event.replyToken, {
+        type: "text",
+        text: "じゃらん",
+      });
+    } else if (event.postback.data === "transfer"){
+      // 振込
+      console.log("振込");
+      return client.replyMessage(event.replyToken, {
+        type: "text",
+        text: "振込",
+      });
+    }
+  } 
   if (event.type !== "message" || event.message.type !== "text") {
-    // ここでポストバック用の分岐も作る。
     console.log("テキストじゃない");
     return Promise.resolve(null);
   } else if (event.message.text === "残高") {
@@ -74,7 +116,8 @@ async function handleEvent(event: any) {
       },
     ]);
 
-  } else if (event.message.text === "使う") {
+  } else if (event.message.text === "使う")
+  {
     console.log(event);
     let replyText = "";
     replyText = event.message.text;
@@ -92,51 +135,73 @@ async function handleEvent(event: any) {
     //振込依頼 "301-0000017に50000円振込"金額は変更可
   } else if (
     /^(?=.*\d{3}-?\d{7})(?=.*円)(?=.*振?込)/.test(event.message.text)
-  ) {
-    const resMessage = await transferService(event.message.text);
+  )
+  {
+    /* text整形 */
+    //支店番号
+    let strMatch:any = event.message.text.match(/\d{3}-?\d{7}/);
+    const beneficiaryBranchCode = strMatch[0].slice(0, 3);
+    //口座番号
+    const accountNumber = strMatch[0].slice(4);
+    //振込額
+    const sliceText = event.message.text.replace(/\d{3}-?\d{7}/, "");
+    strMatch = sliceText.match(/[0-9]+/);
+    const transferAmount = strMatch[0];
 
+    /* 残高照会 */
+    const response = await balancesService.get("/");
+    const childBalance = response.data.spAccountBalances[1].odBalance;
+    console.log("ご褒美", childBalance);
+    console.log("振込", transferAmount);
+
+    let resMessage = "";
+    /* 振込額 < 残高 判定 */
+    if (Number(transferAmount) < Number(childBalance)) {
+      resMessage = await transferService(
+        beneficiaryBranchCode,
+        accountNumber,
+        transferAmount
+      );
+
+      //振込額を親口座に振替
+      const childSpAcId = "SP50220329019";
+      const parentSpAcId = "SP30110005951";
+      spAccountsTransfer(parentSpAcId, childSpAcId, transferAmount);
+
+      return client.replyMessage(event.replyToken, {
+        type: "text",
+        text: resMessage,
+      });
+    } else {
+      resMessage = "ざんねん！残高不足だよ";
+      return client.replyMessage(event.replyToken, {
+        type: "text",
+        text: resMessage,
+      });
+    }
+    //貯める！場合の処理を一旦ここに記載しました
+  } else if (event.message.text == "貯める")
+  {
+    /* 残高照会 */
+    const response = await balancesService.get("/");
+    const childBalance = response.data.spAccountBalances[1].odBalance;
+
+    /* 残高を親口座に振替*/
+    const childSpAcId = "SP50220329019";
+    const parentSpAcId = "SP30110005951";
+    spAccountsTransfer(parentSpAcId, childSpAcId, childBalance);
+
+    let resMessage = `親口座に${Number(childBalance).toLocaleString()}円振替したよ`;
     return client.replyMessage(event.replyToken, {
       type: "text",
       text: resMessage,
     });
-  }
-  return useDeposit(event);
+
+  } return useDeposit(event);
 }
 
-// 「ご褒美使う？」を問うボタンテンプレート　「使う！」、「もう少し頑張る！」、「貯める！」
-const useDeposit = (event: any) => {
-  const param: TemplateMessage = {
-    type: "template",
-    altText: "This is a buttons template",
-    template: {
-      type: "buttons",
-      thumbnailImageUrl: "https://example.com/bot/images/image.jpg",
-      imageAspectRatio: "rectangle",
-      imageSize: "cover",
-      imageBackgroundColor: "#FFFFFF",
-      title: "Menu",
-      text: "Please select",
-      actions: [
-        {
-          type: "postback",
-          label: "Buy",
-          data: "action=buy&itemid=123",
-        },
-        {
-          type: "postback",
-          label: "Add to cart",
-          data: "action=add&itemid=123",
-        },
-        {
-          type: "uri",
-          label: "View detail",
-          uri: "http://example.com/page/123",
-        },
-      ],
-    },
-  };
-  return client.replyMessage(event.replyToken, param);
-};
+
+
 
 // **** Export default **** //
 

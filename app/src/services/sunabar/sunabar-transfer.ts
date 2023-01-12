@@ -2,18 +2,12 @@ import axios from "axios";
 
 const sunabarToken = process.env.SUNABAR_TOKEN;
 
-export const transferService = async (str: any) => {
-  //支店番号抽出
-  const beneficiaryBranchCode = str.match(/\d{3}-?\d{7}/)[0].slice(0, 3);
-  //支店番号抽出
-  const accountNumber = str.match(/\d{3}-?\d{7}/)[0].slice(4);
-  //振込額抽出
-  const sliceText = str.replace(/\d{3}-?\d{7}/, "");
-  const transferAmount = sliceText.match(/[0-9]+/)[0];
-  //確認
-  console.log("支店番号", beneficiaryBranchCode);
-  console.log("口座番号", accountNumber);
-  console.log("transferAmount", transferAmount);
+
+export const transferService = async (
+  beneficiaryBranchCode: any,
+  accountNumber: any,
+  transferAmount: any
+) => {
 
   //振込日セット
   const dt = new Date(Date.now() + 3600000 * 9);
@@ -57,17 +51,19 @@ export const transferService = async (str: any) => {
   const url = "https://bank.sunabar.gmo-aozora.com/bank/notices/important";
 
   const resMessage = await axios(config)
-    .then((res) =>
-    {
-      return `振込受付完了!\n受付番号:${res.data.applyNo}\nパスワード入力してね\n` +
+    .then((res) => {
+      return (
+        `振込受付完了!\n受付番号:${res.data.applyNo}\nパスワード入力してね\n` +
         url
+      );
     })
     .catch(function (error) {
       console.log("error", error);
-      return '振込依頼情報に誤りがあるようです'
+      return "振込依頼情報に誤りがあるようです";
     });
-  
-  console.log("resMessage",resMessage);
+
+  console.log("resMessage", resMessage);
+
   return resMessage;
 };
 
