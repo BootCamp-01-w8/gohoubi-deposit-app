@@ -1,9 +1,10 @@
 import { Router } from "express";
 import * as line from "@line/bot-sdk";
-import { TemplateMessage } from "@line/bot-sdk";
-import { balancesService } from "@src/services/sunabar-service";
-import { transferService } from "@src/services/sunabar-transfer";
-
+import { WebhookEvent ,TemplateMessage} from '@line/bot-sdk';
+import { balancesService } from "@src/services/sunabar/sunabar-service";
+import { useDeposit } from "@src/services/LINEbot/use-deposit";
+import { suggestUsage } from "@src/services/LINEbot/suggestUsage";
+import { transferService } from "@src/services/sunabar/sunabar-transfer";
 
 const WebhookRouter = Router();
 
@@ -15,22 +16,58 @@ const config: any = {
 WebhookRouter.use("/webhook", line.middleware(config));
 
 WebhookRouter.get("/", (req: any, res: any) => {
-  return res.status(200).send({ message: "テスト成功" });
-});
+  return res.status(200).send({ message: "テスト成功" })
+})
 
-WebhookRouter.post("/", (req: any, res: any) => {
-  console.log(req.body.events);
-
-  Promise.all(req.body.events.map(handleEvent)).then((result) =>
-    res.json(result)
-  );
-});
+WebhookRouter.post(
+  "/",
+  (req: any, res: any) => {
+    console.log(req.body.events);
+    Promise.all(req.body.events.map(handleEvent)).then((result) =>
+      res.json(result)
+    );
+  }
+);
 
 const client = new line.Client(config);
 
-async function handleEvent(event: any) {
+async function handleEvent(event: WebhookEvent) {
+  // postback　
+  if(event.type === "postback") {
+    console.log("postback")
+    if(event.postback.data === "useDeposit"){
+      return suggestUsage(event);
+    } else if (event.postback.data === "shopping"){
+      // 楽天
+      console.log("楽天");
+      return client.replyMessage(event.replyToken, {
+        type: "text",
+        text: "楽天",
+      });
+    } else if (event.postback.data === "eat"){
+      // 食べログ
+      console.log("食べログ");
+      return client.replyMessage(event.replyToken, {
+        type: "text",
+        text: "食べログ",
+      });
+    } else if (event.postback.data === "travel"){
+      // じゃらん
+      console.log("じゃらん");
+      return client.replyMessage(event.replyToken, {
+        type: "text",
+        text: "じゃらん",
+      });
+    } else if (event.postback.data === "transfer"){
+      // 振込
+      console.log("振込");
+      return client.replyMessage(event.replyToken, {
+        type: "text",
+        text: "振込",
+      });
+    }
+  } 
   if (event.type !== "message" || event.message.type !== "text") {
-    // ここでポストバック用の分岐も作る。
     console.log("テキストじゃない");
     return Promise.resolve(null);
   } else if (event.message.text === "使う") {
@@ -69,40 +106,8 @@ async function handleEvent(event: any) {
   return useDeposit(event);
 }
 
-// 「ご褒美使う？」を問うボタンテンプレート　「使う！」、「もう少し頑張る！」、「貯める！」
-const useDeposit = (event: any) => {
-  const param: TemplateMessage = {
-    type: "template",
-    altText: "This is a buttons template",
-    template: {
-      type: "buttons",
-      thumbnailImageUrl: "https://example.com/bot/images/image.jpg",
-      imageAspectRatio: "rectangle",
-      imageSize: "cover",
-      imageBackgroundColor: "#FFFFFF",
-      title: "Menu",
-      text: "Please select",
-      actions: [
-        {
-          type: "postback",
-          label: "Buy",
-          data: "action=buy&itemid=123",
-        },
-        {
-          type: "postback",
-          label: "Add to cart",
-          data: "action=add&itemid=123",
-        },
-        {
-          type: "uri",
-          label: "View detail",
-          uri: "http://example.com/page/123",
-        },
-      ],
-    },
-  };
-  return client.replyMessage(event.replyToken, param);
-};
+
+
 
 // **** Export default **** //
 
