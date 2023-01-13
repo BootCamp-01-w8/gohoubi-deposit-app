@@ -3,11 +3,14 @@ import * as line from "@line/bot-sdk";
 
 import { transferService } from "@src/services/sunabar/sunabar-transfer";
 import { spAccountsTransfer } from "@src/services/sunabar/spAccounts";
-import { WebhookEvent, TemplateMessage } from '@line/bot-sdk';
-import { balancesService } from "@src/services/sunabar/sunabar-service";
+import { WebhookEvent, TemplateMessage } from "@line/bot-sdk";
+import {
+  balancesService,
+  selfTransferService100,
+  selfTransferService1000,
+} from "@src/services/sunabar/sunabar-service";
 import { useDeposit } from "@src/services/LINEbot/use-deposit";
 import { postback } from "@src/services/LINEbot/postback";
-
 
 const WebhookRouter = Router();
 
@@ -22,28 +25,94 @@ WebhookRouter.get("/", (req: any, res: any) => {
   return res.status(200).send({ message: "テスト成功" });
 });
 
-
-WebhookRouter.post(
-  "/",
-  (req: any, res: any) => {
-    console.log(req.body.events);
-    Promise.all(req.body.events.map(handleEvent)).then((result) =>
-      res.json(result)
-    );
-  }
-);
+WebhookRouter.post("/", (req: any, res: any) => {
+  console.log(req.body.events);
+  Promise.all(req.body.events.map(handleEvent)).then((result) =>
+    res.json(result)
+  );
+});
 
 const client = new line.Client(config);
 
 async function handleEvent(event: WebhookEvent) {
-  // postback　
+  // 残高照会
+  const balancesResponse = await balancesService.get("/"); //残高照会API呼び出し
+  const rootBalance = balancesResponse.data.spAccountBalances[0].odBalance; //親口座残高
+  const childBalance = balancesResponse.data.spAccountBalances[1].odBalance; //子口座残高
+  console.log(balancesResponse.data); // test
+
+  // postback
   if (event.type === "postback") {
-    console.log("postback")
+    console.log("postback");
     return postback(event);
   }
   if (event.type !== "message" || event.message.type !== "text") {
     console.log("テキストじゃない");
     return Promise.resolve(null);
+  } else if (event.message.text === "残高") {
+    return client.replyMessage(event.replyToken, [
+      {
+        type: "text",
+        text: `残高は、親口座：${rootBalance}円、ごほうび口座：${childBalance}円だよ。`,
+      },
+    ]);
+  } else if (event.message.text === "疲れた" && rootBalance >= 1000) {
+    // ごほうび口座へ振替API呼び出し 100円
+    request(
+      selfTransferService100,
+      function (error: any, selfTransferResponse: { body: string }) {
+        if (error) throw new Error(error);
+        const responsePaymentAmount = JSON.parse(
+          selfTransferResponse.body
+        ).paymentAmount; // 振替金額
+        return client.replyMessage(event.replyToken, [
+          {
+            type: "text",
+            text: `${responsePaymentAmount}円をごほうび貯金したよ`,
+          },
+          {
+            type: "text",
+            text: "おつかれさま！ゆっくりやすんでね。",
+          },
+        ]);
+      }
+    );
+  } else if (event.message.text === "つらい" && rootBalance >= 1000) {
+    // ごほうび口座へ振替API呼び出し 1000円
+    request(
+      selfTransferService1000,
+      function (error: any, selfTransferResponse: { body: string }) {
+        if (error) throw new Error(error);
+        const responsePaymentAmount = JSON.parse(
+          selfTransferResponse.body
+        ).paymentAmount; // 振替金額
+        return client.replyMessage(event.replyToken, [
+          {
+            type: "text",
+            text: `${responsePaymentAmount}円をごほうび貯金したよ`,
+          },
+          {
+            type: "text",
+            text: "大変だったね！次のごほうびは何がいいかな？考えてみて。",
+          },
+        ]);
+      }
+    );
+  } else if (
+    event.message.text === ("疲れた" || "つらい") &&
+    rootBalance < 1000
+  ) {
+    // 残高不足
+    return client.replyMessage(event.replyToken, [
+      {
+        type: "text",
+        text: "おつかれさま！残高が1000円未満なので、ごほうび貯金しなかったよ",
+      },
+      {
+        type: "text",
+        text: `残高は、親口座：${rootBalance}円、ごほうび口座：${childBalance}円だよ。`,
+      },
+    ]);
   } else if (event.message.text === "使う") {
     console.log(event);
     let replyText = "";
@@ -58,13 +127,6 @@ async function handleEvent(event: WebhookEvent) {
       type: "text",
       text: `親口座：${rootBalance},子口座：${childBalance}`,
     });
-
-
-
-
-
-
-
 
     //振込依頼 "301-0000017に50000円振込"金額は変更可
   } else if (
@@ -112,11 +174,9 @@ async function handleEvent(event: WebhookEvent) {
         text: resMessage,
       });
     }
-  } return useDeposit(event);
+  }
+  return useDeposit(event);
 }
-
-
-
 
 // **** Export default **** //
 
