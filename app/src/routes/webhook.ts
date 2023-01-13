@@ -2,6 +2,10 @@ import { Router } from "express";
 import * as line from "@line/bot-sdk";
 import { WebhookEvent } from "@line/bot-sdk";
 
+import { transferService } from "@src/services/sunabar/sunabar-transfer";
+import { spAccountsTransfer } from "@src/services/sunabar/spAccounts";
+
+
 import { postback } from "@src/services/LINEbot/postback";
 import { textMessage } from "@src/services/LINEbot/textMessage";
 import { transfer } from "@src/services/LINEbot/transfer";
@@ -42,6 +46,7 @@ async function handleEvent(event: WebhookEvent) {
   
   /* 振込依頼以外のテキストメッセージへの対応ルート*/
   } else {
+    console.log("textルート");
     textMessage(event);
   };
 }
