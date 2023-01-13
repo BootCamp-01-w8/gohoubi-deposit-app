@@ -15,11 +15,11 @@ export const balancesService = axios.create({
 
 // axios postman
 // ごほうび口座へ振替APIのrequest_parameter
-const depositSpAccountId = "SP50220329040";
-const debitSpAccountId = "SP30210005951";
+const parentSpAcId = "SP30110005951";
+const childSpAcId = "SP50220329019";
 
 // 100円振替
-const data100 = `{ \r\n\t"depositSpAccountId":${depositSpAccountId},\r\n\t"debitSpAccountId":${debitSpAccountId},\r\n\t"currencyCode":"JPY",\r\n\t"paymentAmount":"100"\r\n}`;
+const data100 = `{ \r\n\t"depositSpAccountId":${parentSpAcId},\r\n\t"debitSpAccountId":${childSpAcId},\r\n\t"currencyCode":"JPY",\r\n\t"paymentAmount":"100"\r\n}`;
 
 export const selfTransferService100 = axios.create({
   method: "post",
@@ -33,7 +33,7 @@ export const selfTransferService100 = axios.create({
 });
 
 // 1000円振替
-const data1000 = `{ \r\n\t"depositSpAccountId":${depositSpAccountId},\r\n\t"debitSpAccountId":${debitSpAccountId},\r\n\t"currencyCode":"JPY",\r\n\t"paymentAmount":"500"\r\n}`;
+const data1000 = `{ \r\n\t"depositSpAccountId":${parentSpAcId},\r\n\t"debitSpAccountId":${childSpAcId},\r\n\t"currencyCode":"JPY",\r\n\t"paymentAmount":"500"\r\n}`;
 
 export const selfTransferService1000 = axios.create({
   method: "post",

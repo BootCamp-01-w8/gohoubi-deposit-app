@@ -49,7 +49,6 @@ async function handleEvent(event: WebhookEvent) {
   if (event.type !== "message" || event.message.type !== "text") {
     console.log("テキストじゃない");
     return Promise.resolve(null);
-
   } else if (event.message.text === "残高") {
     return client.replyMessage(event.replyToken, [
       {
@@ -57,45 +56,48 @@ async function handleEvent(event: WebhookEvent) {
         text: `残高は、親口座：${rootBalance}円、ごほうび口座：${childBalance}円だよ。`,
       },
     ]);
-
   } else if (event.message.text === "疲れた" && rootBalance >= 1000) {
     // ごほうび口座へ振替API呼び出し 100円
-    request(selfTransferService100, function (error: any, selfTransferResponse: { body: string; }) {
-      if (error) throw new Error(error);
-      const responsePaymentAmount = JSON.parse(
-        selfTransferResponse.body
-      ).paymentAmount; // 振替金額
-      return client.replyMessage(event.replyToken, [
-        {
-          type: "text",
-          text: `${responsePaymentAmount}円をごほうび貯金したよ`,
-        },
-        {
-          type: "text",
-          text: "おつかれさま！ゆっくりやすんでね。",
-        },
-      ]);
-    });
-
+    request(
+      selfTransferService100,
+      function (error: any, selfTransferResponse: { body: string }) {
+        if (error) throw new Error(error);
+        const responsePaymentAmount = JSON.parse(
+          selfTransferResponse.body
+        ).paymentAmount; // 振替金額
+        return client.replyMessage(event.replyToken, [
+          {
+            type: "text",
+            text: `${responsePaymentAmount}円をごほうび貯金したよ`,
+          },
+          {
+            type: "text",
+            text: "おつかれさま！ゆっくりやすんでね。",
+          },
+        ]);
+      }
+    );
   } else if (event.message.text === "つらい" && rootBalance >= 1000) {
     // ごほうび口座へ振替API呼び出し 1000円
-    request(selfTransferService1000, function (error: any, selfTransferResponse: { body: string; }) {
-      if (error) throw new Error(error);
-      const responsePaymentAmount = JSON.parse(
-        selfTransferResponse.body
-      ).paymentAmount; // 振替金額
-      return client.replyMessage(event.replyToken, [
-        {
-          type: "text",
-          text: `${responsePaymentAmount}円をごほうび貯金したよ`,
-        },
-        {
-          type: "text",
-          text: "大変だったね！次のごほうびは何がいいかな？考えてみて。",
-        },
-      ]);
-    });
-
+    request(
+      selfTransferService1000,
+      function (error: any, selfTransferResponse: { body: string }) {
+        if (error) throw new Error(error);
+        const responsePaymentAmount = JSON.parse(
+          selfTransferResponse.body
+        ).paymentAmount; // 振替金額
+        return client.replyMessage(event.replyToken, [
+          {
+            type: "text",
+            text: `${responsePaymentAmount}円をごほうび貯金したよ`,
+          },
+          {
+            type: "text",
+            text: "大変だったね！次のごほうびは何がいいかな？考えてみて。",
+          },
+        ]);
+      }
+    );
   } else if (
     event.message.text === ("疲れた" || "つらい") &&
     rootBalance < 1000
@@ -111,7 +113,6 @@ async function handleEvent(event: WebhookEvent) {
         text: `残高は、親口座：${rootBalance}円、ごほうび口座：${childBalance}円だよ。`,
       },
     ]);
-
   } else if (event.message.text === "使う") {
     console.log(event);
     let replyText = "";
