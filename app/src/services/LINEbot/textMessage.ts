@@ -23,12 +23,8 @@ export const textMessage = async (event: any) => {
     const balancesResponse = await balancesService.get("/"); //残高照会API呼び出し
     const rootBalance = balancesResponse.data.spAccountBalances[0].odBalance; //親口座残高
     const childBalance = balancesResponse.data.spAccountBalances[1].odBalance; //子口座残高
-    console.log(message);
-    console.log(rootBalance);
-    console.log(childBalance);
 
     if (message === "残高") {
-        console.log("残高");
         return client.replyMessage(event.replyToken, [
             {
                 type: "text",
@@ -36,7 +32,12 @@ export const textMessage = async (event: any) => {
             },
         ]);
     } else if (message === ("疲れた" || "つらい")) {
-        if (message === "疲れた" && rootBalance >= 1000) {
+
+        /* 残高30000円以上で「使う？」ルートへ */
+        if (rootBalance >= 30000) {
+            return useDeposit(event);
+        }
+        else if (message === "疲れた" && rootBalance >= 1000) {
             spAccountsTransfer(childSpAcId, parentSpAcId, 100);
             console.log("疲れた");
             return client.replyMessage(event.replyToken, [
@@ -62,7 +63,7 @@ export const textMessage = async (event: any) => {
                 },
             ]);
 
-            /* 残高不足 */
+        /* 残高不足 */
         } else if (rootBalance < 1000) {
             return client.replyMessage(event.replyToken, [
                 {
@@ -74,18 +75,15 @@ export const textMessage = async (event: any) => {
                     text: `残高は、親口座：${Number(rootBalance).toLocaleString()}円、ごほうび口座：${Number(childBalance).toLocaleString()}円だよ。`,
                 },
             ]);
-
-            /* 残高30000円以上で「使う？」ルートへ */
-        } else if (rootBalance >= 30000) {
-            return useDeposit(event);
-        };
-    } else {
-        return client.replyMessage(event.replyToken,
-            {
-                type: "text",
-                text: `どうしたの？疲れた？つらい？残高？`,
-            }
-        );
+        
+        /* 知らない言葉が来たときの誘導ルート */
+        } else {
+            return client.replyMessage(event.replyToken,
+                {
+                    type: "text",
+                    text: `どうしたの？疲れた？つらい？残高？`,
+                }
+            );
+        }
     }
-
-};
+}

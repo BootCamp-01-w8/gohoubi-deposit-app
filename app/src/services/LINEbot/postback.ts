@@ -21,7 +21,6 @@ export const postback = async (event: PostbackEvent) => {
         return suggestUsage(event);
     } else if (event.postback.data === "shopping") {
         /* 楽天検索　ご褒美口座の残高によって価格帯をセット。*/
-        /* console.log("楽天");*/
         const balance = await balancesService.get("/");
         const max = balance.data.spAccountBalances[1].odBalance;
         return client.replyMessage(event.replyToken, {
@@ -30,14 +29,12 @@ export const postback = async (event: PostbackEvent) => {
         });
     } else if (event.postback.data === "eat") {
         /* 食べログ　現在地から周辺５㎞の食べログ検索結果が出したい。*/
-        /* console.log("食べログ");*/
         return client.replyMessage(event.replyToken, {
             type: "text",
             text: "https://tabelog.com/",
         });
     } else if (event.postback.data === "travel") {
         /* じゃらん 今週末から1泊２日で別府温泉の宿の検索結果。エリアコードをランダムに選んでセット出来たら楽しいかも。*/
-        /* console.log("じゃらん"); */
         const today = endOfWeek(new Date());;
         const stayYear = today.getFullYear();
         const stayMonth = today.getMonth()+1;
@@ -48,7 +45,6 @@ export const postback = async (event: PostbackEvent) => {
         });
     } else if (event.postback.data === "transfer") {
         /* 振込 */
-        /* console.log("振込"); */
         return client.replyMessage(event.replyToken, {
             type: "text",
             text: "振込先と金額を教えてね。", 
