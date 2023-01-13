@@ -37,8 +37,8 @@ export const suggestUsage = (event: ReplyableEvent) => {
                         action: {
                             type: "postback",
                             data: "shopping",
-                            displayText: "お買い物",
-                            label: "shopping"
+                            displayText: "何か買う！",
+                            label: "お買い物"
                         }
                     },
                     {
@@ -46,17 +46,17 @@ export const suggestUsage = (event: ReplyableEvent) => {
                         action: {
                             type: "postback",
                             data: "eat",
-                            displayText: "ごはん",
-                            label: "eat",
+                            displayText: "美味しいもの食べる！",
+                            label: "ごはん",
                         }
                     },
                     {
                         type: "button",
-                        action: {
+                        action:  {
                             type: "postback",
                             data: "travel",
-                            displayText: "旅行",
-                            label: "travel",
+                            displayText: "旅行に行く！",
+                            label: "旅行",
                         }
                     },
                     {
@@ -64,10 +64,9 @@ export const suggestUsage = (event: ReplyableEvent) => {
                         action: {
                             type: "postback",
                             data: "transfer",
-                            displayText: "振込", // ここの文言自由に変えてください！
-                            label: "transfer",
+                            label: "振込",
                             inputOption: "openKeyboard",
-                            fillInText: "301-0000017に50000円振込" // ここの文言自由に変えてください！
+                            fillInText: "301-0000017に50000円振込" 
                         }
                     }
                 ]
