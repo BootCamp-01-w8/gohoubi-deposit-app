@@ -46,6 +46,7 @@ async function handleEvent(event: WebhookEvent) {
   
   /* 振込依頼以外のテキストメッセージへの対応ルート*/
   } else {
+    console.log("textルート");
     textMessage(event);
   };
 }

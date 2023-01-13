@@ -5,8 +5,8 @@ const sunabarToken = process.env.SUNABAR_TOKEN;
 
 export const transferService = async (
   beneficiaryBranchCode: any,
-  accountNumber: any,
-  transferAmount: any
+  accountNumber: number,
+  transferAmount: number
 ) => {
 
   //振込日セット
