@@ -23,9 +23,6 @@ export const textMessage = async (event: any) => {
     const balancesResponse = await balancesService.get("/"); //残高照会API呼び出し
     const rootBalance = balancesResponse.data.spAccountBalances[0].odBalance; //親口座残高
     const childBalance = balancesResponse.data.spAccountBalances[1].odBalance; //子口座残高
-    console.log(message);
-    console.log(rootBalance);
-    console.log(childBalance);
 
     if (message === "残高") {
         console.log("残高");
@@ -35,9 +32,9 @@ export const textMessage = async (event: any) => {
                 text: `残高は、親口座：${Number(rootBalance).toLocaleString()}円、ごほうび口座：${Number(childBalance).toLocaleString()}円だよ。`,
             },
         ]);
-    } else if (message === ("疲れた" || "つらい")) {
+    } else if (message === "疲れた" || message === "つらい") {
         /* 残高30000円以上で「使う？」ルートへ */
-        if (rootBalance >= 30000) {
+        if (childBalance >= 30000) {
             return useDeposit(event);
         }
         else if (message === "疲れた" && rootBalance >= 1000) {
