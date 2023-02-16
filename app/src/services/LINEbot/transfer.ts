@@ -34,7 +34,7 @@ export const transfer = async (event: any) => {
     let resMessage = "";
     /* 振込額 < 残高 判定 */
     if (Number(transferAmount) < Number(childBalance)) {
-        transferService(
+        resMessage = await transferService(
             beneficiaryBranchCode,
             accountNumber,
             transferAmount
@@ -44,6 +44,8 @@ export const transfer = async (event: any) => {
         const childSpAcId = process.env.SUNABAR_CHILD_ACCOUNT_ID;
         const parentSpAcId = process.env.SUNABAR_PARENT_ACCOUNT_ID;
         spAccountsTransfer(parentSpAcId, childSpAcId, transferAmount);
+
+
 
         return client.replyMessage(event.replyToken, {
             type: "text",

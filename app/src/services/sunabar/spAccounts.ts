@@ -2,8 +2,6 @@ import axios from "axios";
 
 const sunabarToken = process.env.SUNABAR_TOKEN;
 
-const childSpAcId = "SP50220329019";
-const parentSpAcId = "SP30110005951";
 
 //depositSpAcId:振込先 debitSpAcId:出金元 paymentAmount:振替額
 export const spAccountsTransfer = (

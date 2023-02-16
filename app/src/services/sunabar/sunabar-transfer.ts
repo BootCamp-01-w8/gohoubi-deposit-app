@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const sunabarToken = process.env.SUNABAR_TOKEN;
-
+const accountId = process.env.SUNABAR_ACCOUNT_ID;
 
 export const transferService = async (
   beneficiaryBranchCode: any,
@@ -20,7 +20,7 @@ export const transferService = async (
 
   //振込依頼
   const data = {
-    accountId: "301010005951",
+    accountId: accountId,
     transferDesignatedDate: currentDate,
     transferDateHolidayCode: "1",
     totalCount: "1",
@@ -33,7 +33,7 @@ export const transferService = async (
         beneficiaryBranchCode: beneficiaryBranchCode,
         accountTypeCode: "1",
         accountNumber: accountNumber,
-        beneficiaryName: "ｽﾅﾊﾞ ﾂﾈｵ",
+        beneficiaryName: "ｽﾅﾊﾞｴﾘ(ｶ",
       },
     ],
   };

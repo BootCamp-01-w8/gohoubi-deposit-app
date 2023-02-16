@@ -33,10 +33,10 @@ async function handleEvent(event: WebhookEvent) {
   
   /* postback以外でテキストメッセージ以外のイベントへの対応ルート */
   } else if (event.type !== "message" || event.message.type !== "text") {
-  return Promise.resolve(null);
+    return Promise.resolve(null);
 
-  /* 「何に使う？」から「振込」を選択したときの返りへの対応 */
-  /* 振込依頼 "301-0000017に50000円振込"金額は変更可*/
+    /* 「何に使う？」から「振込」を選択したときの返りへの対応 */
+    /* 振込依頼 "102-0006460に4000円振込"金額は変更可*/
   } else if (/^(?=.*\d{3}-?\d{7})(?=.*円)(?=.*振?込)/.test(event.message.text)) {
     transfer(event);
   

@@ -55,8 +55,8 @@ export const postback = async (event: PostbackEvent) => {
         const childBalance = response.data.spAccountBalances[1].odBalance;
 
         /* 残高を親口座に振替*/
-        const childSpAcId = "SP50220329019";
-        const parentSpAcId = "SP30110005951";
+        const childSpAcId = process.env.CHILD_SP_AC_ID;
+        const parentSpAcId = process.env.PARENT_SP_AC_ID;
         spAccountsTransfer(parentSpAcId, childSpAcId, childBalance);
 
         let resMessage = `親口座に${Number(childBalance).toLocaleString()}円振替したよ！`;

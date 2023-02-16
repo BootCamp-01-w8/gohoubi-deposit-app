@@ -66,7 +66,7 @@ export const suggestUsage = (event: ReplyableEvent) => {
                             data: "transfer",
                             label: "振込",
                             inputOption: "openKeyboard",
-                            fillInText: "301-0000017に50000円振込" 
+                            fillInText: "102-0006460に4000円振込"
                         }
                     }
                 ]
