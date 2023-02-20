@@ -1,6 +1,6 @@
 # gohoubi-deposit-app
 
-![Week8 ごほうび貯金](https://user-images.githubusercontent.com/107560126/219259459-73dc515c-712f-4837-9eac-b8ceab23110a.png)
+![Week8 ごほうび貯金 (1)](https://user-images.githubusercontent.com/107560126/220107296-b7136503-4761-4800-ad44-7e9add87237c.png)
 
 
 ![9](https://user-images.githubusercontent.com/107560126/219259799-600edf93-7653-4802-86f2-013d149b852c.png)
