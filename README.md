@@ -1,5 +1,9 @@
 # gohoubi-deposit-app
 
+
+https://user-images.githubusercontent.com/107560126/220119579-e19aa9d0-0307-47e5-b433-f8ea44f02ce0.mp4
+
+
 ![Week8 ごほうび貯金 (1)](https://user-images.githubusercontent.com/107560126/220107296-b7136503-4761-4800-ad44-7e9add87237c.png)
 
 
